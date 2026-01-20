@@ -1,14 +1,26 @@
 {
-  "hooks": [
-    {
-      "event": "Stop",
-      "command": [".claude/hooks/stop.sh"],
-      "description": "컨텍스트 50% 이하 시 자동 /compact 실행"
-    },
-    {
-      "event": "SessionStart",
-      "command": [".claude/hooks/session-start.sh"],
-      "description": "/compact 후 세션 재시작 시 자동 복구"
-    }
-  ]
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": {},
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/stop.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": {},
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
 }
