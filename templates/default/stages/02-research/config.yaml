@@ -1,0 +1,34 @@
+# Stage Configuration: 02-research
+
+stage:
+  id: "02-research"
+  name: "Research"
+  description: "시장 조사, 기술 조사, 경쟁사 분석 수행"
+
+ai:
+  models:
+    - claude
+  primary: claude
+  execution_mode: plan
+
+inputs:
+  required:
+    - ../01-brainstorm/outputs/ideas.md
+  optional:
+    - ../01-brainstorm/outputs/requirements.md
+
+outputs:
+  required:
+    - market_research.md
+    - tech_research.md
+    - competitor_analysis.md
+  optional: []
+
+dependencies:
+  - "01-brainstorm"
+
+checkpoint:
+  required: false
+  recommended: false
+
+timeout: 7200

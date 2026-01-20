@@ -1,0 +1,225 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 2.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Is this a pre-release?'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  prepare:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.changelog.outputs.content }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid version format: $VERSION"
+            exit 1
+          fi
+
+      - name: Check if tag exists
+        run: |
+          if git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "::error::Tag v${{ inputs.version }} already exists"
+            exit 1
+          fi
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          VERSION="${{ inputs.version }}"
+
+          # Get previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            COMMITS=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+
+          # Create changelog content
+          CHANGELOG=$(cat << EOF
+          ## What's Changed
+
+          $COMMITS
+
+          ## Packages
+
+          - \`ax-templates@$VERSION\` - NPM CLI
+          - \`@ax-templates/core@$VERSION\` - Core library
+          - \`@ax-templates/plugin@$VERSION\` - Claude Code plugin
+
+          ## Installation
+
+          \`\`\`bash
+          # NPM CLI
+          npm install -g ax-templates@$VERSION
+
+          # Claude Code Plugin
+          claude plugin install @ax-templates/plugin@$VERSION
+          \`\`\`
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG:-initial}...v$VERSION
+          EOF
+          )
+
+          # Save to output (escape newlines)
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  version-bump:
+    name: Bump Version
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update versions
+        run: |
+          VERSION="${{ inputs.version }}"
+
+          # Update root package.json
+          jq ".version = \"$VERSION\"" package.json > tmp.json && mv tmp.json package.json
+
+          # Update all packages
+          for pkg in packages/*/package.json; do
+            jq ".version = \"$VERSION\"" "$pkg" > tmp.json && mv tmp.json "$pkg"
+          done
+
+          # Update workspace dependencies
+          jq ".dependencies[\"@ax-templates/core\"] = \"workspace:*\"" packages/cli/package.json > tmp.json
+          mv tmp.json packages/cli/package.json
+
+      - name: Commit version bump
+        run: |
+          VERSION="${{ inputs.version }}"
+          git add .
+          git commit -m "chore(release): v$VERSION"
+
+      - name: Create tag
+        run: |
+          VERSION="${{ inputs.version }}"
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+
+      - name: Push changes
+        run: |
+          git push origin main
+          git push origin "v${{ inputs.version }}"
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [prepare, version-bump]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ inputs.version }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Create release archives
+        run: |
+          VERSION="${{ inputs.version }}"
+
+          # Create CLI archive
+          cd packages/cli
+          tar -czf "../../ax-templates-$VERSION.tar.gz" dist bin package.json README.md
+
+          # Create plugin archive
+          cd ../plugin
+          tar -czf "../../ax-templates-plugin-$VERSION.tar.gz" \
+            plugin.json CLAUDE.md .claude config scripts state package.json README.md
+
+          cd ../..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: v${{ inputs.version }}
+          body: ${{ needs.prepare.outputs.changelog }}
+          prerelease: ${{ inputs.prerelease }}
+          files: |
+            ax-templates-${{ inputs.version }}.tar.gz
+            ax-templates-plugin-${{ inputs.version }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  trigger-publish:
+    name: Trigger NPM Publish
+    runs-on: ubuntu-latest
+    needs: create-release
+    steps:
+      - name: Trigger publish workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'publish.yml',
+              ref: 'v${{ inputs.version }}',
+              inputs: {
+                version: '${{ inputs.version }}',
+                dry_run: 'false'
+              }
+            });
+
+            console.log('Triggered publish workflow for v${{ inputs.version }}');

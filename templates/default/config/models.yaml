@@ -1,0 +1,79 @@
+# ax-templates AI Model Configuration
+
+models:
+  gemini:
+    enabled: true
+    cli: gemini
+    tmux_session: "{{GEMINI_SESSION}}"
+    timeout: "{{OUTPUT_TIMEOUT}}"
+    stages:
+      - 01-brainstorm
+      - 03-planning
+      - 04-ui-ux
+
+  claude:
+    enabled: true
+    type: primary  # Claude Code is the primary orchestrator
+    stages:
+      - 01-brainstorm
+      - 02-research
+      - 05-task-management
+      - 06-implementation
+      - 08-qa
+      - 10-deployment
+
+  codex:
+    enabled: true
+    cli: codex
+    tmux_session: "{{CODEX_SESSION}}"
+    timeout: "{{OUTPUT_TIMEOUT}}"
+    stages:
+      - 07-refactoring
+      - 09-testing
+
+# Model selection rules
+rules:
+  # Brainstorming uses Gemini for creative ideation
+  - stage: 01-brainstorm
+    primary: gemini
+    fallback: claude
+
+  # Research uses Claude for deep analysis
+  - stage: 02-research
+    primary: claude
+
+  # Planning uses Gemini for architectural decisions
+  - stage: 03-planning
+    primary: gemini
+    fallback: claude
+
+  # UI/UX uses Gemini for design thinking
+  - stage: 04-ui-ux
+    primary: gemini
+    fallback: claude
+
+  # Task management uses Claude for structured breakdown
+  - stage: 05-task-management
+    primary: claude
+
+  # Implementation uses Claude Code
+  - stage: 06-implementation
+    primary: claude
+
+  # Refactoring uses Codex for code optimization
+  - stage: 07-refactoring
+    primary: codex
+    fallback: claude
+
+  # QA uses Claude for bug detection
+  - stage: 08-qa
+    primary: claude
+
+  # Testing uses Codex with Playwright
+  - stage: 09-testing
+    primary: codex
+    fallback: claude
+
+  # Deployment uses Claude for CI/CD setup
+  - stage: 10-deployment
+    primary: claude

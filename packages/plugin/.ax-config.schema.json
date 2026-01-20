@@ -1,0 +1,211 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ax-templates.dev/schema/config.json",
+  "title": "AX Templates Configuration",
+  "description": "Configuration schema for ax-templates multi-AI workflow pipeline",
+  "type": "object",
+  "properties": {
+    "ax_templates": {
+      "type": "object",
+      "description": "AX Templates metadata",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Configuration version",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "default": "2.0.0"
+        }
+      },
+      "required": ["version"]
+    },
+    "paths": {
+      "type": "object",
+      "description": "Project path configuration",
+      "properties": {
+        "project_root": {
+          "type": "string",
+          "description": "Source code location (PROJECT_ROOT)",
+          "default": "./my-app"
+        },
+        "stages_output": {
+          "type": "string",
+          "description": "Stage output files location",
+          "default": "./stages"
+        },
+        "state": {
+          "type": "string",
+          "description": "State files location",
+          "default": "./state"
+        },
+        "checkpoints": {
+          "type": "string",
+          "description": "Checkpoints location",
+          "default": "./state/checkpoints"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ai": {
+      "type": "object",
+      "description": "AI CLI activation settings",
+      "properties": {
+        "gemini": {
+          "type": "boolean",
+          "description": "Enable Gemini CLI",
+          "default": true
+        },
+        "codex": {
+          "type": "boolean",
+          "description": "Enable Codex CLI",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "tmux": {
+      "type": "object",
+      "description": "tmux session configuration",
+      "properties": {
+        "gemini_session": {
+          "type": "string",
+          "description": "Gemini tmux session name",
+          "default": "ax-gemini"
+        },
+        "codex_session": {
+          "type": "string",
+          "description": "Codex tmux session name",
+          "default": "ax-codex"
+        },
+        "output_timeout": {
+          "type": "integer",
+          "description": "Output timeout in seconds",
+          "minimum": 30,
+          "maximum": 3600,
+          "default": 300
+        }
+      },
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "description": "Context management thresholds (percentage of remaining context)",
+      "properties": {
+        "warning": {
+          "type": "integer",
+          "description": "Warning threshold percentage",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 60
+        },
+        "action": {
+          "type": "integer",
+          "description": "Action threshold percentage (auto-save trigger)",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 50
+        },
+        "critical": {
+          "type": "integer",
+          "description": "Critical threshold percentage (/clear recommendation)",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 40
+        },
+        "task_save_frequency": {
+          "type": "integer",
+          "description": "Auto-save after N completed tasks",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 5
+        }
+      },
+      "additionalProperties": false
+    },
+    "timeouts": {
+      "type": "object",
+      "description": "Per-stage timeout settings in seconds",
+      "propertyNames": {
+        "pattern": "^\\d{2}-[a-z-]+$"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 60,
+        "maximum": 86400
+      },
+      "default": {
+        "01-brainstorm": 3600,
+        "02-research": 3600,
+        "03-planning": 7200,
+        "04-ui-ux": 7200,
+        "05-task-management": 3600,
+        "06-implementation": 14400,
+        "07-refactoring": 7200,
+        "08-qa": 7200,
+        "09-testing": 7200,
+        "10-deployment": 3600
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "description": "MCP server configuration",
+      "properties": {
+        "search": {
+          "type": "array",
+          "description": "Search MCP servers",
+          "items": {
+            "type": "string",
+            "enum": ["context7", "exa", "firecrawl", "tavily"]
+          },
+          "default": ["context7", "exa"]
+        },
+        "browser": {
+          "type": "array",
+          "description": "Browser automation MCP servers",
+          "items": {
+            "type": "string",
+            "enum": ["playwright", "puppeteer", "selenium"]
+          },
+          "default": ["playwright"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "git": {
+      "type": "object",
+      "description": "Git commit settings",
+      "properties": {
+        "commit_language": {
+          "type": "string",
+          "description": "Commit message language",
+          "enum": ["Korean", "English", "Japanese", "Chinese"],
+          "default": "Korean"
+        },
+        "auto_commit": {
+          "type": "boolean",
+          "description": "Enable automatic commits",
+          "default": true
+        },
+        "commit_types": {
+          "type": "object",
+          "description": "Commit type mapping per stage",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["feat", "fix", "docs", "style", "refactor", "test", "ci", "chore"]
+              },
+              "scope": {
+                "type": "string"
+              }
+            },
+            "required": ["type", "scope"]
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["ax_templates"],
+  "additionalProperties": false
+}

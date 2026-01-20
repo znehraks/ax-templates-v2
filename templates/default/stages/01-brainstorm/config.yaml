@@ -1,0 +1,37 @@
+# Stage Configuration: 01-brainstorm
+
+stage:
+  id: "01-brainstorm"
+  name: "Brainstorming"
+  description: "프로젝트 아이디어 발산 및 초기 요구사항 정의"
+
+ai:
+  models:
+    - gemini
+    - claude
+  primary: gemini
+  execution_mode: yolo
+
+inputs:
+  required:
+    - project_brief.md
+  optional: []
+
+outputs:
+  required:
+    - ideas.md
+    - requirements.md
+    - constraints.md
+  optional: []
+
+dependencies: []
+
+checkpoint:
+  required: false
+  recommended: false
+
+timeout: 3600  # 1 hour
+
+prompts:
+  - ideation.md
+  - requirements_extraction.md

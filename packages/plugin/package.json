@@ -1,0 +1,26 @@
+{
+  "name": "@ax-templates/plugin",
+  "version": "2.0.0",
+  "description": "ax-templates Claude Code Plugin",
+  "type": "module",
+  "files": [
+    "plugin.json",
+    "CLAUDE.md",
+    ".claude/",
+    "config/",
+    "stages/",
+    "scripts/",
+    "state/"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "ai-workflow",
+    "pipeline"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,147 +1,325 @@
 # ax-templates
 
-🚀 **Multi-AI Workflow Pipeline Template System**
+Multi-AI Workflow Pipeline for Software Development
 
-10단계 소프트웨어 개발 워크플로우를 템플릿화하여 AI 에이전트 간 협업을 자동화하는 시스템입니다.
+[![CI](https://github.com/your-org/ax-templates/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/ax-templates/actions/workflows/ci.yml)
+[![npm version](https://badge.fury.io/js/ax-templates.svg)](https://www.npmjs.com/package/ax-templates)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 특징
+## Overview
 
-- **10단계 파이프라인**: 브레인스토밍부터 배포까지 전체 개발 사이클 커버
-- **멀티 AI 오케스트레이션**: Gemini, Claude, ClaudeCode, Codex 협업
-- **무상태 핸드오프**: HANDOFF.md를 통한 스테이지 간 컨텍스트 전달
-- **체크포인트 시스템**: 안전한 롤백 지원
-- **tmux 기반 CLI 통합**: `/gemini`, `/codex` 커맨드로 외부 AI CLI 호출
+ax-templates is a 10-stage software development workflow pipeline that orchestrates multiple AI models (Claude, Gemini, Codex) for end-to-end project development.
 
-## 빠른 시작
+### Key Features
 
-```bash
-# 1. 새 프로젝트 초기화
-/init-project my-saas-app
+- **10-Stage Pipeline**: Complete development cycle from brainstorming to deployment
+- **Multi-AI Orchestration**: Seamless collaboration between Gemini, Claude, and Codex
+- **Stateless Handoff**: Context transfer between stages via HANDOFF.md
+- **Checkpoint System**: Safe rollback support
+- **Dual Distribution**: Both NPM CLI and Claude Code plugin available
 
-# 2. 프로젝트 브리프 작성
-# stages/01-brainstorm/inputs/project_brief.md 편집
+### Pipeline Stages
 
-# 3. 첫 번째 스테이지 실행
-/run-stage 01-brainstorm
-
-# 4. 스테이지 완료 후 핸드오프 생성
-/handoff
-
-# 5. 다음 스테이지 진행
-/run-stage 02-research
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     ax-templates Pipeline                           │
+├─────────────────────────────────────────────────────────────────────┤
+│  01 Brainstorm  →  02 Research  →  03 Planning  →  04 UI/UX        │
+│     Gemini          Claude          Gemini          Gemini          │
+├─────────────────────────────────────────────────────────────────────┤
+│  05 Tasks  →  06 Implement  →  07 Refactor  →  08 QA  →  09 Test   │
+│    Claude       Claude           Codex         Claude     Codex     │
+├─────────────────────────────────────────────────────────────────────┤
+│                          10 Deploy                                  │
+│                            Claude                                   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-## 파이프라인 스테이지
-
-| 단계 | 이름 | AI 모델 | 실행 모드 |
-|------|------|---------|-----------|
-| 01 | Brainstorming | Gemini + ClaudeCode | YOLO |
+| Stage | Name | AI Model | Mode |
+|-------|------|----------|------|
+| 01 | Brainstorming | Gemini + Claude | YOLO (Container) |
 | 02 | Research | Claude | Plan Mode |
 | 03 | Planning | Gemini | Plan Mode |
 | 04 | UI/UX Planning | Gemini | Plan Mode |
-| 05 | Task Management | ClaudeCode | Plan Mode |
-| 06 | Implementation | ClaudeCode | Plan + Sandbox |
+| 05 | Task Management | Claude | Plan Mode |
+| 06 | Implementation | Claude | Plan + Sandbox |
 | 07 | Refactoring | Codex | Deep Dive |
-| 08 | QA | ClaudeCode | Plan + Sandbox |
+| 08 | QA | Claude | Plan + Sandbox |
 | 09 | Testing & E2E | Codex | Sandbox + Playwright |
-| 10 | CI/CD & Deployment | ClaudeCode | Headless |
+| 10 | CI/CD & Deployment | Claude | Headless |
 
-## 디렉토리 구조
+## Installation
+
+### NPM CLI
+
+```bash
+# Global installation
+npm install -g ax-templates
+
+# Or use directly with npx
+npx ax-templates init my-project
+```
+
+### Claude Code Plugin
+
+```bash
+claude plugin install @ax-templates/plugin
+```
+
+## Quick Start
+
+### Using CLI
+
+```bash
+# Initialize a new project
+ax init my-project
+cd my-project
+
+# Edit project brief
+# stages/01-brainstorm/inputs/project_brief.md
+
+# Start with brainstorming
+ax brainstorm
+
+# Check status
+ax status
+
+# Create handoff and move to next stage
+ax handoff
+ax next
+```
+
+### Using Claude Code Plugin
+
+In Claude Code, run:
+
+```
+/init-project my-project
+/brainstorm
+/status
+/handoff
+/next
+```
+
+## Packages
+
+This monorepo contains three packages:
+
+| Package | Description | Install |
+|---------|-------------|---------|
+| [`ax-templates`](./packages/cli) | NPM CLI | `npm install -g ax-templates` |
+| [`@ax-templates/core`](./packages/core) | Core library | `npm install @ax-templates/core` |
+| [`@ax-templates/plugin`](./packages/plugin) | Claude Code plugin | `claude plugin install @ax-templates/plugin` |
+
+## Commands
+
+### Core Commands
+
+| Command | CLI | Plugin |
+|---------|-----|--------|
+| Initialize project | `ax init` | `/init-project` |
+| Show status | `ax status` | `/status` |
+| List stages | `ax stages` | `/stages` |
+| Run stage | `ax run-stage <id>` | `/run-stage <id>` |
+| Next stage | `ax next` | `/next` |
+| Create handoff | `ax handoff` | `/handoff` |
+| Create checkpoint | `ax checkpoint` | `/checkpoint` |
+| Restore checkpoint | `ax restore` | `/restore` |
+| Check context | `ax context` | `/context` |
+
+### AI Commands
+
+| Command | CLI | Plugin |
+|---------|-----|--------|
+| Gemini prompt | `ax gemini <prompt>` | `/gemini <prompt>` |
+| Codex prompt | `ax codex <prompt>` | `/codex <prompt>` |
+
+### Stage Shortcuts
+
+| Stage | CLI | Plugin |
+|-------|-----|--------|
+| 01-brainstorm | `ax brainstorm` | `/brainstorm` |
+| 02-research | `ax research` | `/research` |
+| 03-planning | `ax planning` | `/planning` |
+| 04-ui-ux | `ax ui-ux` | `/ui-ux` |
+| 05-task-management | `ax tasks` | `/tasks` |
+| 06-implementation | `ax implement` | `/implement` |
+| 07-refactoring | `ax refactor` | `/refactor` |
+| 08-qa | `ax qa` | `/qa` |
+| 09-testing | `ax test` | `/test` |
+| 10-deployment | `ax deploy` | `/deploy` |
+
+## Configuration
+
+Project configuration is stored in `.ax-config.yaml`:
+
+```yaml
+ax_templates:
+  version: "2.0.0"
+
+paths:
+  project_root: "./my-app"
+  stages_output: "./stages"
+  state: "./state"
+  checkpoints: "./state/checkpoints"
+
+ai:
+  gemini: true
+  codex: true
+
+tmux:
+  gemini_session: "ax-gemini"
+  codex_session: "ax-codex"
+  output_timeout: 300
+
+context:
+  warning: 60
+  action: 50
+  critical: 40
+  task_save_frequency: 5
+
+git:
+  commit_language: "Korean"
+  auto_commit: true
+```
+
+## Project Structure
+
+```
+my-project/
+├── .ax-config.yaml        # Configuration
+├── CLAUDE.md              # AI instructions
+├── stages/                # Stage outputs
+│   ├── 01-brainstorm/
+│   │   ├── CLAUDE.md
+│   │   ├── config.yaml
+│   │   ├── prompts/
+│   │   ├── inputs/
+│   │   └── outputs/
+│   ├── 02-research/
+│   └── ...
+├── state/
+│   ├── progress.json      # Pipeline progress
+│   ├── context/           # Context states
+│   └── checkpoints/       # Recovery points
+└── my-app/                # Source code
+    └── src/
+```
+
+## Design Patterns
+
+1. **Sequential Workflow Architecture** - Sequential stage definition and auto-progression
+2. **Stateless Orchestration** - Stateless context transfer via HANDOFF.md
+3. **Orchestrator-Workers** - Parallel agent execution (Brainstorm stage)
+4. **Proactive State Externalization** - External state file management
+5. **State Machine Workflow** - State transition management (progress.json)
+6. **Layered Configuration** - Hierarchical configuration structure
+
+## Documentation
+
+- [CLI Reference](./packages/cli/README.md)
+- [Plugin Reference](./packages/plugin/README.md)
+- [Migration Guide](./docs/migration-guide.md)
+
+## Development
+
+### Prerequisites
+
+- Node.js >= 18.0.0
+- pnpm >= 8.0.0
+- tmux (for AI sessions)
+
+### Setup
+
+```bash
+# Clone repository
+git clone https://github.com/your-org/ax-templates.git
+cd ax-templates
+
+# Install dependencies
+pnpm install
+
+# Build all packages
+pnpm build
+
+# Run tests
+pnpm test
+```
+
+### Local Development
+
+```bash
+# Link CLI globally
+cd packages/cli
+pnpm link --global
+
+# Test CLI
+ax --help
+
+# Link plugin to Claude Code
+claude plugin link ./packages/plugin
+```
+
+### Monorepo Structure
 
 ```
 ax-templates/
-├── CLAUDE.md                 # 전역 AI 지침
-├── config/
-│   ├── pipeline.yaml         # 파이프라인 정의
-│   ├── models.yaml           # AI 모델 설정
-│   ├── context.yaml          # 컨텍스트 관리 설정
-│   ├── workflow.yaml         # 워크플로우 설정
-│   ├── model_enforcement.yaml # AI 역할 분담
-│   ├── git.yaml              # Git 자동 커밋 규칙
-│   ├── ai_logging.yaml       # AI 호출 로깅 설정
-│   ├── qa_logging.yaml       # 문답 자동 기록 설정
-│   └── mcp_fallbacks.yaml    # MCP 폴백 설정
-├── stages/
-│   └── XX-stage-name/
-│       ├── CLAUDE.md         # 스테이지 AI 지침
-│       ├── config.yaml       # 스테이지 설정
-│       ├── prompts/          # 프롬프트 템플릿
-│       ├── templates/        # 출력 템플릿
-│       ├── inputs/           # 입력 파일
-│       └── outputs/          # 출력 파일
-├── state/
-│   ├── progress.json         # 파이프라인 진행 상황
-│   ├── checkpoints/          # 체크포인트
-│   └── handoffs/             # 핸드오프 아카이브
-├── scripts/                  # 오케스트레이션 스크립트
-├── .claude/
-│   ├── commands/             # 슬래시 커맨드
-│   └── hooks/                # 훅 스크립트
-└── docs/                     # 문서
+├── packages/
+│   ├── core/              # Shared business logic
+│   │   ├── src/
+│   │   │   ├── config/    # Configuration management
+│   │   │   ├── stage/     # Stage management
+│   │   │   ├── context/   # Context management
+│   │   │   └── ai/        # AI model abstraction
+│   │   └── package.json
+│   │
+│   ├── cli/               # NPM CLI package
+│   │   ├── src/
+│   │   │   ├── commands/  # CLI commands
+│   │   │   └── prompts/   # Interactive prompts
+│   │   ├── bin/ax.js
+│   │   └── package.json
+│   │
+│   └── plugin/            # Claude Code plugin
+│       ├── plugin.json
+│       ├── CLAUDE.md
+│       ├── .claude/
+│       │   ├── commands/  # Slash commands
+│       │   └── hooks/     # Lifecycle hooks
+│       ├── scripts/       # Helper scripts
+│       └── package.json
+│
+├── templates/             # Installable templates
+│   └── default/           # Default 10-stage template
+│
+├── docs/                  # Documentation
+└── package.json           # Monorepo root
 ```
 
-## 슬래시 커맨드
+## Contributing
 
-### 기본 명령어
-| 커맨드 | 설명 |
-|--------|------|
-| `/init-project [name]` | 새 프로젝트 초기화 |
-| `/run-stage [stage-id]` | 스테이지 실행 |
-| `/handoff` | 핸드오프 문서 생성 |
-| `/checkpoint [desc]` | 체크포인트 생성 |
-| `/gemini [prompt]` | Gemini CLI 호출 (tmux) |
-| `/codex [prompt]` | Codex CLI 호출 (tmux) |
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### 가시성 명령어
-| 커맨드 | 설명 |
-|--------|------|
-| `/status` | 파이프라인 전체 상태 확인 |
-| `/stages` | 스테이지 목록 및 상세 |
-| `/context` | 컨텍스트(토큰) 상태 관리 |
+### Commit Convention
 
-### 네비게이션 명령어
-| 커맨드 | 설명 |
-|--------|------|
-| `/next` | 다음 스테이지로 전환 |
-| `/restore` | 체크포인트에서 복구 |
+We use [Conventional Commits](https://www.conventionalcommits.org/):
 
-### 스테이지 단축 명령어
-| 커맨드 | 스테이지 |
-|--------|----------|
-| `/brainstorm` | 01-brainstorm |
-| `/research` | 02-research |
-| `/planning` | 03-planning |
-| `/ui-ux` | 04-ui-ux |
-| `/tasks` | 05-task-management |
-| `/implement` | 06-implementation |
-| `/refactor` | 07-refactoring |
-| `/qa` | 08-qa |
-| `/test` | 09-testing |
-| `/deploy` | 10-deployment |
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation
+- `chore`: Maintenance
+- `refactor`: Code refactoring
+- `test`: Test updates
 
-## 디자인 패턴
-
-1. **Sequential Workflow Architecture** - 순차적 단계 정의
-2. **Stateless Orchestration** - 무상태 컨텍스트 전달
-3. **Orchestrator-Workers** - 병렬 에이전트 실행
-4. **Proactive State Externalization** - 외부 상태 관리
-5. **State Machine Workflow** - 상태 전이 관리
-6. **Layered Configuration** - 계층화된 설정
-
-## 필수 조건
-
-- Claude Code CLI
-- tmux (멀티 AI 오케스트레이션용)
-- jq (상태 관리용)
-- Gemini CLI (선택)
-- Codex CLI (선택)
-
-## 라이선스
+## License
 
 MIT
 
-## 문서
+## Related
 
-- [Getting Started](docs/getting-started.md)
-- [Architecture](docs/architecture.md)
-- [Design Patterns](docs/patterns/)
+- [Claude Code](https://claude.ai/claude-code) - AI coding assistant
+- [Gemini CLI](https://github.com/google-gemini/gemini-cli) - Google's AI CLI

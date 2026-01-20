@@ -1,0 +1,17 @@
+stage:
+  id: "07-refactoring"
+  name: "Refactoring"
+
+ai:
+  models: [codex]
+  primary: codex
+  execution_mode: deep_dive
+
+dependencies: ["06-implementation"]
+checkpoint:
+  required: true
+timeout: 7200
+
+git:
+  commit_type: "refactor"
+  commit_scope: "refactor"

@@ -1,0 +1,249 @@
+name: Publish to NPM
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 2.0.0)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Dry run (no actual publish)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate version consistency
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+
+          # Check root package.json
+          ROOT_VERSION=$(jq -r '.version' package.json)
+          if [ "$ROOT_VERSION" != "$VERSION" ]; then
+            echo "::error::Root package.json version ($ROOT_VERSION) doesn't match tag ($VERSION)"
+            exit 1
+          fi
+
+          # Check all packages
+          for pkg in packages/*/package.json; do
+            PKG_VERSION=$(jq -r '.version' "$pkg")
+            if [ "$PKG_VERSION" != "$VERSION" ]; then
+              echo "::error::$pkg version ($PKG_VERSION) doesn't match tag ($VERSION)"
+              exit 1
+            fi
+          done
+
+          echo "All package versions match: $VERSION"
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            packages/*/dist
+          retention-days: 1
+
+  publish-core:
+    name: Publish @ax-templates/core
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: packages
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish @ax-templates/core
+        if: ${{ !inputs.dry_run }}
+        working-directory: packages/core
+        run: pnpm publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Dry run publish
+        if: ${{ inputs.dry_run }}
+        working-directory: packages/core
+        run: pnpm publish --access public --no-git-checks --dry-run
+
+  publish-cli:
+    name: Publish ax-templates (CLI)
+    runs-on: ubuntu-latest
+    needs: publish-core
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: packages
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Update core dependency to published version
+        working-directory: packages/cli
+        run: |
+          VERSION=${{ needs.validate.outputs.version }}
+          jq ".dependencies[\"@ax-templates/core\"] = \"^$VERSION\"" package.json > tmp.json
+          mv tmp.json package.json
+
+      - name: Publish ax-templates
+        if: ${{ !inputs.dry_run }}
+        working-directory: packages/cli
+        run: pnpm publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Dry run publish
+        if: ${{ inputs.dry_run }}
+        working-directory: packages/cli
+        run: pnpm publish --access public --no-git-checks --dry-run
+
+  publish-plugin:
+    name: Publish @ax-templates/plugin
+    runs-on: ubuntu-latest
+    needs: publish-core
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish @ax-templates/plugin
+        if: ${{ !inputs.dry_run }}
+        working-directory: packages/plugin
+        run: pnpm publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Dry run publish
+        if: ${{ inputs.dry_run }}
+        working-directory: packages/plugin
+        run: pnpm publish --access public --no-git-checks --dry-run
+
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [validate, publish-cli, publish-plugin]
+    if: always()
+    steps:
+      - name: Publish result
+        run: |
+          VERSION=${{ needs.validate.outputs.version }}
+          if [ "${{ needs.publish-cli.result }}" == "success" ] && [ "${{ needs.publish-plugin.result }}" == "success" ]; then
+            echo "::notice::Successfully published ax-templates v$VERSION to NPM"
+          else
+            echo "::error::Failed to publish ax-templates v$VERSION"
+            exit 1
+          fi

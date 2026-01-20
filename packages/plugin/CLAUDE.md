@@ -1,0 +1,171 @@
+# ax-templates - Multi-AI Workflow Pipeline
+
+10단계 소프트웨어 개발 워크플로우 템플릿 시스템
+
+## 파이프라인 개요
+
+| 단계 | 이름 | AI 모델 | 실행 모드 |
+|------|------|---------|-----------|
+| 01 | Brainstorming | Gemini + ClaudeCode | YOLO (Container) |
+| 02 | Research | Claude | Plan Mode |
+| 03 | Planning | Gemini | Plan Mode |
+| 04 | UI/UX Planning | Gemini | Plan Mode |
+| 05 | Task Management | ClaudeCode | Plan Mode |
+| 06 | Implementation | ClaudeCode | Plan + Sandbox |
+| 07 | Refactoring | Codex | Deep Dive |
+| 08 | QA | ClaudeCode | Plan + Sandbox |
+| 09 | Testing & E2E | Codex | Sandbox + Playwright |
+| 10 | CI/CD & Deployment | ClaudeCode | Headless |
+
+## 컨텍스트 관리 규칙
+
+> 설정: `.ax-config.yaml` → `context` 섹션
+
+### 퍼센트 기반 임계값 (남은 컨텍스트 기준)
+
+| 임계값 | 트리거 | 동작 |
+|--------|--------|------|
+| **{{CONTEXT_WARNING}}%** (warning) | 경고 표시 | 압축 비율 계산, 배너 표시 |
+| **{{CONTEXT_ACTION}}%** (action) | 자동 저장 | `state/context/`에 상태 저장 |
+| **{{CONTEXT_CRITICAL}}%** (critical) | `/clear` 권고 | 강제 저장, 복구 HANDOFF 생성 |
+
+### 태스크 기반 자동 저장
+- **{{TASK_SAVE_FREQUENCY}}개 태스크 완료마다** 상태 자동 저장
+- 저장 위치: `state/context/state_{timestamp}_{stage}.md`
+
+## 슬래시 커맨드
+
+### 기본 명령어
+| 커맨드 | 설명 |
+|--------|------|
+| `/init-project` | 새 프로젝트 초기화 |
+| `/run-stage [id]` | 특정 스테이지 실행 |
+| `/status` | 파이프라인 전체 상태 확인 |
+| `/stages` | 스테이지 목록 및 상세 |
+| `/next` | 다음 스테이지로 전환 |
+| `/handoff` | 현재 스테이지 HANDOFF.md 생성 |
+| `/checkpoint` | 체크포인트 생성 |
+| `/restore` | 체크포인트에서 복구 |
+| `/context` | 컨텍스트 상태 확인 |
+| `/gemini [prompt]` | Gemini CLI 호출 |
+| `/codex [prompt]` | Codex CLI 호출 |
+
+### 스테이지 단축 명령어
+| 커맨드 | 스테이지 |
+|--------|----------|
+| `/brainstorm` | 01-brainstorm |
+| `/research` | 02-research |
+| `/planning` | 03-planning |
+| `/ui-ux` | 04-ui-ux |
+| `/tasks` | 05-task-management |
+| `/implement` | 06-implementation |
+| `/refactor` | 07-refactoring |
+| `/qa` | 08-qa |
+| `/test` | 09-testing |
+| `/deploy` | 10-deployment |
+
+## 스테이지 전환 프로토콜
+
+### 필수 순서
+1. 현재 스테이지의 모든 outputs 생성 확인
+2. `HANDOFF.md` 생성 (필수)
+3. 체크포인트 생성 (구현/리팩토링 스테이지)
+4. `state/progress.json` 업데이트
+5. 다음 스테이지 `CLAUDE.md` 로드
+
+### HANDOFF.md 필수 포함 항목
+- 완료된 작업 체크리스트
+- 핵심 결정사항 및 이유
+- 성공/실패한 접근법
+- 다음 단계 즉시 실행 작업
+- 체크포인트 참조 (해당시)
+
+## Git 자동 커밋 규칙
+
+### 커밋 메시지 형식 (Conventional Commits)
+```
+<type>(<scope>): <description>
+```
+
+| 스테이지 | 타입 | 스코프 |
+|---------|------|--------|
+| 06-implementation | `feat` | `impl` |
+| 07-refactoring | `refactor` | `refactor` |
+| 08-qa | `fix` | `qa` |
+| 09-testing | `test` | `test` |
+| 10-deployment | `ci` | `deploy` |
+
+### 커밋 원칙
+- 커밋 언어: {{COMMIT_LANGUAGE}}
+- 자동 커밋: {{AUTO_COMMIT}}
+- 작은 단위로 자주 커밋
+- 의미 있는 커밋 메시지 작성
+
+## 금지 사항
+
+- HANDOFF.md 없이 스테이지 전환
+- 체크포인트 없이 파괴적 작업 (구현/리팩토링)
+- 단일 세션에 복수 스테이지 혼합
+- 이전 스테이지 outputs 수정
+- WIP 커밋, 의미 없는 커밋 메시지
+
+## 디렉토리 구조
+
+### ⚠️ 핵심 구분: TEMPLATE_ROOT vs PROJECT_ROOT
+
+```
+TEMPLATE_ROOT (파이프라인 관리)     PROJECT_ROOT (소스코드)
+/my-new-project/                   {{PROJECT_ROOT}}/
+├── stages/        ← 산출물        ├── src/
+│   └── XX-stage/                  ├── public/
+│       └── outputs/               ├── package.json
+├── config/                        └── ...
+├── state/
+└── CLAUDE.md
+```
+
+### 경로 규칙
+
+| 유형 | 저장 위치 |
+|------|----------|
+| 산출물 (문서) | `{{STAGES_OUTPUT}}/XX/outputs/` |
+| 소스 코드 | `{{PROJECT_ROOT}}/src/` |
+| 상태 파일 | `{{STATE_DIR}}/` |
+| HANDOFF | `{{STAGES_OUTPUT}}/XX/` |
+| 체크포인트 | `{{CHECKPOINTS_DIR}}/` |
+
+## AI 모델 호출
+
+### Gemini CLI
+- tmux 세션: `{{GEMINI_SESSION}}`
+- 래퍼 스크립트: `scripts/gemini-wrapper.sh`
+- 출력 타임아웃: {{OUTPUT_TIMEOUT}}초
+
+### Codex CLI
+- tmux 세션: `{{CODEX_SESSION}}`
+- 래퍼 스크립트: `scripts/codex-wrapper.sh`
+- 출력 타임아웃: {{OUTPUT_TIMEOUT}}초
+
+## 설정 파일
+
+프로젝트 설정: `.ax-config.yaml`
+
+```yaml
+ax_templates:
+  version: "2.0.0"
+
+paths:
+  project_root: "{{PROJECT_ROOT}}"
+  stages_output: "{{STAGES_OUTPUT}}"
+  state: "{{STATE_DIR}}"
+  checkpoints: "{{CHECKPOINTS_DIR}}"
+
+ai:
+  gemini: {{GEMINI_ENABLED}}
+  codex: {{CODEX_ENABLED}}
+
+context:
+  warning: {{CONTEXT_WARNING}}
+  action: {{CONTEXT_ACTION}}
+  critical: {{CONTEXT_CRITICAL}}
+```

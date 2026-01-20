@@ -1,0 +1,250 @@
+/**
+ * @ax-templates/core - Configuration Merger
+ * Merges multiple configuration sources with proper precedence
+ */
+
+import { merge, get, set, cloneDeep } from 'lodash-es';
+import type { AxConfig } from './schema.js';
+
+// ============================================
+// Deep Merge Utilities
+// ============================================
+
+/**
+ * Deep merges two configuration objects
+ * Later sources override earlier ones
+ */
+export function mergeConfigs<T extends object>(base: T, override: Partial<T>): T {
+  return merge(cloneDeep(base), override);
+}
+
+/**
+ * Merges multiple configuration objects in order
+ */
+export function mergeMultipleConfigs<T extends object>(...configs: Array<Partial<T> | undefined>): T {
+  const validConfigs = configs.filter((c): c is Partial<T> => c !== undefined);
+  if (validConfigs.length === 0) {
+    return {} as T;
+  }
+
+  return validConfigs.reduce((acc, config) => mergeConfigs(acc, config), {} as T) as T;
+}
+
+// ============================================
+// Environment Variable Processing
+// ============================================
+
+/**
+ * Parses an environment variable value to the appropriate type
+ */
+function parseEnvValue(value: string): string | number | boolean {
+  // Boolean
+  if (value.toLowerCase() === 'true') return true;
+  if (value.toLowerCase() === 'false') return false;
+
+  // Number
+  const num = Number(value);
+  if (!isNaN(num) && value.trim() !== '') return num;
+
+  // String (default)
+  return value;
+}
+
+/**
+ * Applies environment variables to a configuration object
+ * Uses a mapping of config paths to environment variable names
+ */
+export function applyEnvironmentVariables(
+  config: AxConfig,
+  envMap: Record<string, string>
+): AxConfig {
+  const result = cloneDeep(config);
+
+  for (const [configPath, envVar] of Object.entries(envMap)) {
+    const envValue = process.env[envVar];
+    if (envValue !== undefined) {
+      const parsedValue = parseEnvValue(envValue);
+      set(result, configPath, parsedValue);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Gets all environment variables that would affect the config
+ */
+export function getActiveEnvironmentOverrides(
+  envMap: Record<string, string>
+): Map<string, { envVar: string; value: string | number | boolean }> {
+  const overrides = new Map<string, { envVar: string; value: string | number | boolean }>();
+
+  for (const [configPath, envVar] of Object.entries(envMap)) {
+    const envValue = process.env[envVar];
+    if (envValue !== undefined) {
+      overrides.set(configPath, {
+        envVar,
+        value: parseEnvValue(envValue),
+      });
+    }
+  }
+
+  return overrides;
+}
+
+// ============================================
+// CLI Override Processing
+// ============================================
+
+export interface CLIOverride {
+  path: string;
+  value: string | number | boolean;
+}
+
+/**
+ * Parses CLI flag overrides into config paths
+ * Examples:
+ *   --timeout=3600 -> timeouts.06-implementation = 3600
+ *   --project-root=./my-app -> paths.project_root = ./my-app
+ */
+export function parseCLIOverrides(flags: Record<string, unknown>): CLIOverride[] {
+  const overrides: CLIOverride[] = [];
+
+  const flagMap: Record<string, string> = {
+    'timeout': 'timeouts.06-implementation',
+    'project-root': 'paths.project_root',
+    'stages-output': 'paths.stages_output',
+    'state-dir': 'paths.state',
+    'gemini-session': 'tmux.gemini_session',
+    'codex-session': 'tmux.codex_session',
+    'context-warning': 'context.warning',
+    'context-action': 'context.action',
+    'context-critical': 'context.critical',
+    'auto-commit': 'git.auto_commit',
+    'commit-lang': 'git.commit_language',
+  };
+
+  for (const [flag, value] of Object.entries(flags)) {
+    if (value !== undefined && flag in flagMap) {
+      overrides.push({
+        path: flagMap[flag],
+        value: typeof value === 'string' ? parseEnvValue(value) : value as string | number | boolean,
+      });
+    }
+  }
+
+  return overrides;
+}
+
+/**
+ * Applies CLI overrides to a configuration object
+ */
+export function applyCLIOverrides(config: AxConfig, overrides: CLIOverride[]): AxConfig {
+  const result = cloneDeep(config);
+
+  for (const { path, value } of overrides) {
+    set(result, path, value);
+  }
+
+  return result;
+}
+
+// ============================================
+// Configuration Diffing
+// ============================================
+
+export interface ConfigDiff {
+  path: string;
+  oldValue: unknown;
+  newValue: unknown;
+}
+
+/**
+ * Computes the difference between two configurations
+ */
+export function diffConfigs(oldConfig: AxConfig, newConfig: AxConfig): ConfigDiff[] {
+  const diffs: ConfigDiff[] = [];
+
+  const compare = (oldObj: object, newObj: object, prefix = '') => {
+    const allKeys = new Set([...Object.keys(oldObj), ...Object.keys(newObj)]);
+
+    for (const key of allKeys) {
+      const path = prefix ? `${prefix}.${key}` : key;
+      const oldValue = get(oldObj, key);
+      const newValue = get(newObj, key);
+
+      if (oldValue === newValue) continue;
+
+      if (
+        typeof oldValue === 'object' &&
+        typeof newValue === 'object' &&
+        oldValue !== null &&
+        newValue !== null &&
+        !Array.isArray(oldValue) &&
+        !Array.isArray(newValue)
+      ) {
+        compare(oldValue, newValue, path);
+      } else {
+        diffs.push({ path, oldValue, newValue });
+      }
+    }
+  };
+
+  compare(oldConfig, newConfig);
+  return diffs;
+}
+
+// ============================================
+// Template Variable Resolution
+// ============================================
+
+/**
+ * Resolves template variables in a string
+ * Variables are in the format {{VARIABLE_NAME}}
+ */
+export function resolveTemplateVariables(
+  template: string,
+  variables: Record<string, string | number | boolean>
+): string {
+  return template.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
+    if (varName in variables) {
+      return String(variables[varName]);
+    }
+    return match; // Keep unresolved variables as-is
+  });
+}
+
+/**
+ * Creates a variables object from configuration for template resolution
+ */
+export function configToTemplateVariables(config: AxConfig): Record<string, string | number | boolean> {
+  return {
+    // Paths
+    PROJECT_ROOT: config.paths.project_root,
+    STAGES_OUTPUT: config.paths.stages_output,
+    STATE_DIR: config.paths.state,
+    CHECKPOINTS_DIR: config.paths.checkpoints,
+
+    // tmux
+    GEMINI_SESSION: config.tmux.gemini_session,
+    CODEX_SESSION: config.tmux.codex_session,
+    TMUX_TIMEOUT: config.tmux.output_timeout,
+
+    // Context
+    CONTEXT_WARNING: config.context.warning,
+    CONTEXT_ACTION: config.context.action,
+    CONTEXT_CRITICAL: config.context.critical,
+    TASK_SAVE_FREQ: config.context.task_save_frequency,
+
+    // Git
+    COMMIT_LANGUAGE: config.git.commit_language,
+    AUTO_COMMIT: config.git.auto_commit,
+
+    // AI
+    AI_GEMINI: config.ai.gemini,
+    AI_CODEX: config.ai.codex,
+
+    // Version
+    AX_VERSION: config.ax_templates.version,
+  };
+}

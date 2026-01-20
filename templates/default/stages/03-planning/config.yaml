@@ -1,0 +1,14 @@
+stage:
+  id: "03-planning"
+  name: "Planning"
+  description: "시스템 아키텍처 설계 및 프로젝트 계획 수립"
+
+ai:
+  models: [gemini]
+  primary: gemini
+  execution_mode: plan
+
+dependencies: ["02-research"]
+checkpoint:
+  required: false
+timeout: 7200

@@ -1,0 +1,17 @@
+stage:
+  id: "08-qa"
+  name: "QA"
+
+ai:
+  models: [claude]
+  primary: claude
+  execution_mode: plan_sandbox
+
+dependencies: ["07-refactoring"]
+checkpoint:
+  required: false
+timeout: 7200
+
+git:
+  commit_type: "fix"
+  commit_scope: "qa"

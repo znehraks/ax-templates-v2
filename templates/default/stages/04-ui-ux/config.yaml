@@ -1,0 +1,14 @@
+stage:
+  id: "04-ui-ux"
+  name: "UI/UX Planning"
+  description: "사용자 인터페이스 및 경험 설계"
+
+ai:
+  models: [gemini]
+  primary: gemini
+  execution_mode: plan
+
+dependencies: ["03-planning"]
+checkpoint:
+  required: false
+timeout: 7200

@@ -1,0 +1,62 @@
+{
+  "name": "ax-templates",
+  "version": "2.0.0",
+  "displayName": "AX Templates - Multi-AI Workflow Pipeline",
+  "description": "10-stage software development workflow with multi-AI orchestration",
+  "author": "ax-templates",
+
+  "configuration": {
+    "schema": ".ax-config.schema.json",
+    "defaults": "config/defaults.yaml"
+  },
+
+  "entrypoint": {
+    "instructions": "CLAUDE.md",
+    "settings": ".claude/settings.json"
+  },
+
+  "commands": {
+    "directory": ".claude/commands",
+    "commands": [
+      "init-project",
+      "run-stage",
+      "status",
+      "stages",
+      "next",
+      "handoff",
+      "checkpoint",
+      "restore",
+      "gemini",
+      "codex",
+      "context",
+      "brainstorm",
+      "research",
+      "planning",
+      "ui-ux",
+      "tasks",
+      "implement",
+      "refactor",
+      "qa",
+      "test",
+      "deploy"
+    ]
+  },
+
+  "hooks": {
+    "sessionStart": "scripts/session-start.sh",
+    "stop": "scripts/stop.sh"
+  },
+
+  "statusline": {
+    "enabled": true,
+    "script": ".claude/hooks/statusline.sh"
+  },
+
+  "mcp": {
+    "recommended": [
+      "context7",
+      "exa",
+      "playwright"
+    ]
+  }
+}

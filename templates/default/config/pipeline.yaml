@@ -1,0 +1,102 @@
+# ax-templates Pipeline Configuration
+
+pipeline:
+  name: "ax-templates"
+  version: "2.0.0"
+  description: "10-stage software development workflow"
+
+stages:
+  - id: "01-brainstorm"
+    name: "Brainstorming"
+    ai_models: [gemini, claude]
+    execution_mode: yolo
+    inputs: []
+    outputs: [ideas.md, requirements.md, constraints.md]
+    depends_on: []
+    checkpoint_required: false
+
+  - id: "02-research"
+    name: "Research"
+    ai_models: [claude]
+    execution_mode: plan
+    inputs: [01-brainstorm/outputs/ideas.md]
+    outputs: [market_research.md, tech_research.md, competitor_analysis.md]
+    depends_on: [01-brainstorm]
+    checkpoint_required: false
+
+  - id: "03-planning"
+    name: "Planning"
+    ai_models: [gemini]
+    execution_mode: plan
+    inputs: [02-research/outputs/tech_research.md]
+    outputs: [architecture.md, tech_stack.md, project_plan.md]
+    depends_on: [02-research]
+    checkpoint_required: false
+
+  - id: "04-ui-ux"
+    name: "UI/UX Planning"
+    ai_models: [gemini]
+    execution_mode: plan
+    inputs: [03-planning/outputs/architecture.md]
+    outputs: [wireframes.md, component_specs.md, design_system.md]
+    depends_on: [03-planning]
+    checkpoint_required: false
+
+  - id: "05-task-management"
+    name: "Task Management"
+    ai_models: [claude]
+    execution_mode: plan
+    inputs: [04-ui-ux/outputs/component_specs.md]
+    outputs: [task_breakdown.md, implementation_order.md, dependencies.md]
+    depends_on: [04-ui-ux]
+    checkpoint_required: false
+
+  - id: "06-implementation"
+    name: "Implementation"
+    ai_models: [claude]
+    execution_mode: plan_sandbox
+    inputs: [05-task-management/outputs/task_breakdown.md]
+    outputs: [implementation_log.md, technical_decisions.md]
+    depends_on: [05-task-management]
+    checkpoint_required: true
+
+  - id: "07-refactoring"
+    name: "Refactoring"
+    ai_models: [codex]
+    execution_mode: deep_dive
+    inputs: [06-implementation/outputs/implementation_log.md]
+    outputs: [refactoring_log.md, performance_improvements.md]
+    depends_on: [06-implementation]
+    checkpoint_required: true
+
+  - id: "08-qa"
+    name: "QA"
+    ai_models: [claude]
+    execution_mode: plan_sandbox
+    inputs: [07-refactoring/outputs/refactoring_log.md]
+    outputs: [bug_report.md, fixes_applied.md, qa_checklist.md]
+    depends_on: [07-refactoring]
+    checkpoint_required: false
+
+  - id: "09-testing"
+    name: "Testing & E2E"
+    ai_models: [codex]
+    execution_mode: sandbox_playwright
+    inputs: [08-qa/outputs/fixes_applied.md]
+    outputs: [test_cases.md, test_results.md, coverage_report.md]
+    depends_on: [08-qa]
+    checkpoint_required: false
+
+  - id: "10-deployment"
+    name: "CI/CD & Deployment"
+    ai_models: [claude]
+    execution_mode: headless
+    inputs: [09-testing/outputs/test_results.md]
+    outputs: [ci_cd_config.md, deployment_guide.md, release_notes.md]
+    depends_on: [09-testing]
+    checkpoint_required: false
+
+timeouts:
+  default: 3600
+  "06-implementation": 14400
+  "07-refactoring": 7200

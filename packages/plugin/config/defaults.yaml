@@ -1,0 +1,49 @@
+# ax-templates Default Configuration
+# These values are used when not specified in .ax-config.yaml
+
+ax_templates:
+  version: "2.0.0"
+
+paths:
+  project_root: "./app"
+  stages_output: "./stages"
+  state: "./state"
+  checkpoints: "./state/checkpoints"
+
+ai:
+  gemini: true
+  codex: true
+
+tmux:
+  gemini_session: "ax-gemini"
+  codex_session: "ax-codex"
+  output_timeout: 300
+
+context:
+  warning: 60
+  action: 50
+  critical: 40
+  task_save_frequency: 5
+
+timeouts:
+  "01-brainstorm": 3600
+  "02-research": 7200
+  "03-planning": 7200
+  "04-ui-ux": 7200
+  "05-task-management": 3600
+  "06-implementation": 14400
+  "07-refactoring": 7200
+  "08-qa": 7200
+  "09-testing": 7200
+  "10-deployment": 3600
+
+mcp:
+  search:
+    - context7
+    - exa
+  browser:
+    - playwright
+
+git:
+  commit_language: "Korean"
+  auto_commit: true

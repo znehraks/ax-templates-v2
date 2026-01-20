@@ -1,0 +1,44 @@
+# Stage Configuration: 06-implementation
+
+stage:
+  id: "06-implementation"
+  name: "Implementation"
+  description: "설계된 아키텍처와 태스크 계획에 따라 소스 코드 구현"
+
+ai:
+  models:
+    - claude
+  primary: claude
+  execution_mode: plan_sandbox
+
+inputs:
+  required:
+    - ../05-task-management/outputs/task_breakdown.md
+    - ../05-task-management/outputs/implementation_order.md
+  optional:
+    - ../04-ui-ux/outputs/component_specs.md
+    - ../03-planning/outputs/architecture.md
+
+outputs:
+  required:
+    - implementation_log.md
+    - technical_decisions.md
+  optional: []
+
+dependencies:
+  - "05-task-management"
+
+checkpoint:
+  required: true
+  recommended: true
+  frequency: "50% completion"
+
+timeout: 14400  # 4 hours
+
+git:
+  commit_type: "feat"
+  commit_scope: "impl"
+
+prompts:
+  - implementation_guide.md
+  - code_review.md

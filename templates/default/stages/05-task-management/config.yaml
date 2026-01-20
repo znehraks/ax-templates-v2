@@ -1,0 +1,14 @@
+stage:
+  id: "05-task-management"
+  name: "Task Management"
+  description: "구현 태스크 분해 및 순서 계획"
+
+ai:
+  models: [claude]
+  primary: claude
+  execution_mode: plan
+
+dependencies: ["04-ui-ux"]
+checkpoint:
+  required: false
+timeout: 3600

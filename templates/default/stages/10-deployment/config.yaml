@@ -1,0 +1,17 @@
+stage:
+  id: "10-deployment"
+  name: "CI/CD & Deployment"
+
+ai:
+  models: [claude]
+  primary: claude
+  execution_mode: headless
+
+dependencies: ["09-testing"]
+checkpoint:
+  required: false
+timeout: 3600
+
+git:
+  commit_type: "ci"
+  commit_scope: "deploy"
