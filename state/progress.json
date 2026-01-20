@@ -1,0 +1,122 @@
+{
+  "pipeline": {
+    "name": "Multi-AI Development Workflow",
+    "version": "1.0.0",
+    "project_name": null,
+    "started_at": null,
+    "updated_at": null
+  },
+  "current_stage": null,
+  "stages": {
+    "01-brainstorm": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "handoff_generated": false,
+      "checkpoint_id": null,
+      "outputs": [],
+      "errors": []
+    },
+    "02-research": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "handoff_generated": false,
+      "checkpoint_id": null,
+      "outputs": [],
+      "errors": []
+    },
+    "03-planning": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "handoff_generated": false,
+      "checkpoint_id": null,
+      "outputs": [],
+      "errors": []
+    },
+    "04-ui-ux": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "handoff_generated": false,
+      "checkpoint_id": null,
+      "outputs": [],
+      "errors": []
+    },
+    "05-task-management": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "handoff_generated": false,
+      "checkpoint_id": null,
+      "outputs": [],
+      "errors": []
+    },
+    "06-implementation": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "handoff_generated": false,
+      "checkpoint_id": null,
+      "outputs": [],
+      "errors": []
+    },
+    "07-refactoring": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "handoff_generated": false,
+      "checkpoint_id": null,
+      "outputs": [],
+      "errors": []
+    },
+    "08-qa": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "handoff_generated": false,
+      "checkpoint_id": null,
+      "outputs": [],
+      "errors": []
+    },
+    "09-testing": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "handoff_generated": false,
+      "checkpoint_id": null,
+      "outputs": [],
+      "errors": []
+    },
+    "10-deployment": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "handoff_generated": false,
+      "checkpoint_id": null,
+      "outputs": [],
+      "errors": []
+    }
+  },
+  "checkpoints": [],
+  "context_snapshots": [
+    {
+      "file": "/Users/youjungmin/Documents/vibespace/ax-templates-3/state/context/auto-snapshot-20260120-163754.md",
+      "reason": "auto-warning",
+      "remaining": 50,
+      "timestamp": "2026-01-20T16:37:54+09:00"
+    },
+    {
+      "file": "/Users/youjungmin/Documents/vibespace/ax-templates-3/state/context/auto-snapshot-20260120-163801.md",
+      "reason": "auto-warning",
+      "remaining": 50,
+      "timestamp": "2026-01-20T16:38:01+09:00"
+    }
+  ],
+  "metadata": {
+    "total_tokens_used": 0,
+    "total_api_calls": 0,
+    "models_used": []
+  }
+}

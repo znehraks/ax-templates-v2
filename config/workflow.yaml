@@ -1,0 +1,42 @@
+# ax-templates Workflow Configuration
+# Claude Code settings.json과 별도로 관리되는 워크플로우 설정
+
+# 스킬 설정
+skills:
+  stage-transition:
+    description: "스테이지 전환 자동화"
+    directory: ".claude/skills/stage-transition"
+    triggers:
+      - "완료"
+      - "끝났어"
+      - "done"
+      - "finished"
+      - "/handoff"
+      - "/next"
+
+  context-compression:
+    description: "컨텍스트 압축 및 관리"
+    directory: ".claude/skills/context-compression"
+    triggers:
+      - "token_warning"
+      - "token_limit"
+      - "/context --compress"
+
+# 훅 설정 (스크립트에서 직접 호출)
+hooks:
+  pre-stage: ".claude/hooks/pre-stage.sh"
+  post-stage: ".claude/hooks/post-stage.sh"
+
+# 컨텍스트 관리
+context:
+  warning_threshold: 50000
+  limit_threshold: 80000
+  auto_save: true
+  state_file: "state/context/state.md"
+
+# 체크포인트 설정
+checkpoints:
+  directory: "state/checkpoints"
+  required_stages:
+    - "06-implementation"
+    - "07-refactoring"

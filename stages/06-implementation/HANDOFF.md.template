@@ -1,0 +1,125 @@
+# Stage Handoff: 06-implementation → 07-refactoring
+
+**생성일**: {{TIMESTAMP}}
+**생성자**: ClaudeCode
+**소요 시간**: {{DURATION}}
+
+---
+
+## 완료된 작업
+
+- [ ] 프로젝트 스캐폴딩
+- [ ] 공통 컴포넌트 ({{COMPONENT_COUNT}}개)
+- [ ] 핵심 기능 구현
+- [ ] API 엔드포인트 ({{API_COUNT}}개)
+- [ ] 체크포인트 생성
+- [ ] HANDOFF.md 생성
+
+---
+
+## 다음 에이전트를 위한 컨텍스트
+
+### 프로젝트 구조
+```
+source_code/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── api/
+│   ├── lib/
+│   └── styles/
+├── package.json
+└── ...
+```
+
+### 기술 스택 확정
+
+| 영역 | 기술 | 버전 |
+|------|------|------|
+| Framework | {{FRAMEWORK}} | {{VERSION}} |
+| UI Library | {{UI_LIB}} | |
+| State | {{STATE_MGMT}} | |
+| API | {{API_STYLE}} | |
+
+### 구현 완료 기능
+
+| 기능 | 상태 | 파일 |
+|------|------|------|
+| {{FEATURE_1}} | 완료 | {{FILE_1}} |
+| {{FEATURE_2}} | 완료 | {{FILE_2}} |
+| {{FEATURE_3}} | 완료 | {{FILE_3}} |
+
+### 알려진 이슈 / 기술 부채
+1. {{TECH_DEBT_1}}
+2. {{TECH_DEBT_2}}
+
+### 리팩토링 필요 영역
+- {{REFACTOR_AREA_1}}: {{REASON_1}}
+- {{REFACTOR_AREA_2}}: {{REASON_2}}
+
+---
+
+## 체크포인트 정보
+
+| ID | 생성일 | 설명 |
+|----|--------|------|
+| {{CP_ID}} | {{CP_DATE}} | 스프린트 1 완료 |
+
+복구 명령:
+```bash
+scripts/restore-checkpoint.sh {{CP_ID}}
+```
+
+---
+
+## 생성된 산출물
+
+| 파일 | 설명 |
+|------|------|
+| source_code/ | 구현된 소스 코드 |
+| implementation_log.md | 구현 로그 |
+
+---
+
+## 07-refactoring 스테이지 가이드
+
+### 즉시 실행할 작업
+1. 코드 품질 분석 (ESLint, TypeScript)
+2. 중복 코드 식별
+3. 성능 병목 지점 분석
+
+### 리팩토링 우선순위
+1. {{REFACTOR_PRIORITY_1}}
+2. {{REFACTOR_PRIORITY_2}}
+3. {{REFACTOR_PRIORITY_3}}
+
+### 주의사항
+- 기존 기능 깨뜨리지 않도록 주의
+- 리팩토링 전/후 동작 동일 확인
+- 체크포인트 활용
+
+---
+
+## AI 호출 기록
+
+| AI | 호출 시간 | 프롬프트 | 결과 | 상태 |
+|----|----------|---------|------|------|
+| {{AI_1}} | {{TIME_1}} | {{PROMPT_1}} | {{OUTPUT_1}} | {{STATUS_1}} |
+| {{AI_2}} | {{TIME_2}} | {{PROMPT_2}} | {{OUTPUT_2}} | {{STATUS_2}} |
+
+> 설정: `config/ai_logging.yaml`
+
+---
+
+## 메타데이터
+
+```yaml
+stage: "06-implementation"
+status: "completed"
+next_stage: "07-refactoring"
+models_used:
+  - claudecode
+checkpoint_id: "{{CP_ID}}"
+files_created: {{FILE_COUNT}}
+lines_of_code: {{LOC}}
+```

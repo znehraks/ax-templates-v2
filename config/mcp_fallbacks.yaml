@@ -1,0 +1,135 @@
+# MCP Fallback Configuration
+# ax-templates-3 MCP 도구 폴백 설정 (Issue #3 해결)
+
+mcp_fallbacks:
+  # 활성화 여부
+  enabled: true
+
+  # 폴백 트리거 조건
+  triggers:
+    - quota_exceeded       # 할당량 초과
+    - service_unavailable  # 서비스 불가
+    - timeout              # 타임아웃
+    - rate_limited         # 요청 제한
+
+# 검색 도구 우선순위
+search:
+  # 코드/문서 검색
+  code_documentation:
+    primary: "context7"
+    fallbacks:
+      - "exa"
+      - "web_search"
+
+    # 폴백 규칙
+    rules:
+      on_quota_exceeded: "use_fallback"
+      on_timeout: "retry_then_fallback"
+      retry_count: 2
+      retry_delay_ms: 1000
+
+  # 웹 검색
+  web_search:
+    primary: "exa"
+    fallbacks:
+      - "web_search"
+
+    rules:
+      on_quota_exceeded: "use_fallback"
+      on_timeout: "use_fallback"
+
+  # Reddit/커뮤니티 검색
+  community:
+    primary: "exa"
+    fallbacks:
+      - "web_search"
+
+    # 커뮤니티 검색 전용 설정
+    settings:
+      include_domains:
+        - "reddit.com"
+        - "news.ycombinator.com"
+        - "dev.to"
+        - "stackoverflow.com"
+
+# 브라우저/웹 도구 우선순위
+browser:
+  primary: "playwright"
+  fallbacks:
+    - "chrome-devtools"
+
+  rules:
+    on_connection_failed: "use_fallback"
+
+# Notion 도구 (폴백 없음)
+notion:
+  primary: "notion"
+  fallbacks: []
+
+  # Notion은 폴백 불가, 에러 시 알림만
+  on_error:
+    action: "notify_user"
+    message: "Notion 연결 실패. MCP 설정을 확인하세요."
+
+# Figma 도구 (폴백 없음)
+figma:
+  primary: "figma-dev-mode"
+  fallbacks: []
+
+  on_error:
+    action: "notify_user"
+    message: "Figma 연결 실패. Dev Mode MCP 설정을 확인하세요."
+
+# 스테이지별 MCP 우선순위
+stage_preferences:
+  "01-brainstorm":
+    search: ["exa", "web_search"]  # 웹 리서치 중심
+    reason: "커뮤니티/아이디어 검색에 Exa 우선"
+
+  "02-research":
+    search: ["context7", "exa", "web_search"]
+    reason: "기술 문서 검색에 Context7 우선"
+
+  "03-planning":
+    search: ["context7", "exa"]
+    reason: "아키텍처 패턴/문서 검색"
+
+  "04-ui-ux":
+    browser: ["figma-dev-mode", "playwright"]
+    search: ["exa", "web_search"]
+    reason: "UI 레퍼런스 검색"
+
+  "06-implementation":
+    search: ["context7"]
+    reason: "라이브러리 문서 검색에 Context7 필수"
+
+  "09-testing":
+    browser: ["playwright", "chrome-devtools"]
+    reason: "E2E 테스트에 Playwright 필수"
+
+# 상태 모니터링
+monitoring:
+  # 할당량 경고
+  quota_warning:
+    threshold_percent: 80
+    action: "warn_user"
+
+  # 사용량 로깅
+  usage_logging:
+    enabled: true
+    log_file: "state/mcp_usage.log"
+
+# 에러 처리
+error_handling:
+  # 모든 폴백 실패 시
+  all_fallbacks_failed:
+    action: "notify_user_and_continue"
+    message: |
+      ⚠️ 모든 MCP 검색 도구가 실패했습니다.
+      - 수동 검색을 진행하거나
+      - MCP 서버 상태를 확인하세요.
+
+  # 복구 불가 에러
+  fatal_error:
+    action: "save_state_and_notify"
+    message: "MCP 치명적 오류. 상태를 저장하고 세션을 재시작하세요."
