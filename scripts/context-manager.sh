@@ -387,13 +387,74 @@ EOF
     # Step 2: 권장 조치 안내
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     if [ "$LEVEL" = "critical" ]; then
-        echo -e "${RED}⚠️ /compact 또는 /clear 실행이 필요합니다${NC}"
+        echo -e "${RED}⚠️ 컨텍스트 임계값 도달 (40% 이하)${NC}"
         echo ""
-        echo "권장 조치:"
-        echo "1. /compact - 대화 요약 후 계속"
-        echo "2. /clear - 컨텍스트 완전 초기화"
+        echo -e "스냅샷이 자동 저장되었습니다: ${CYAN}$(basename "$SNAPSHOT_FILE")${NC}"
         echo ""
-        echo "복구 시 참조: $SNAPSHOT_FILE"
+
+        # 사용자 확인 프롬프트
+        echo -e "${WHITE}컨텍스트를 초기화하시겠습니까?${NC}"
+        echo ""
+        echo "  [y] /clear 실행 (스냅샷에서 복구 가능)"
+        echo "  [c] /compact 실행 (대화 요약 후 계속)"
+        echo "  [n] 취소 (수동으로 처리)"
+        echo ""
+        read -p "선택 [y/c/n]: " -n 1 -r CLEAR_CHOICE
+        echo ""
+        echo ""
+
+        case $CLEAR_CHOICE in
+            [Yy])
+                echo -e "${GREEN}✓${NC} /clear 실행 중..."
+                echo ""
+
+                # 복구 정보 저장
+                echo "{\"action\": \"clear\", \"snapshot\": \"$SNAPSHOT_FILE\", \"timestamp\": \"$(date -Iseconds)\"}" > "$CONTEXT_DIR/pending-clear.json"
+
+                # tmux를 통해 /clear 자동 실행
+                if [ -n "$TMUX" ]; then
+                    # 현재 tmux 세션에서 실행
+                    sleep 1
+                    tmux send-keys "/clear" Enter
+                    echo -e "${GREEN}✓${NC} /clear 명령이 전송되었습니다."
+                elif tmux list-sessions 2>/dev/null | grep -q "claude"; then
+                    # claude 세션 찾아서 전송
+                    CLAUDE_SESSION=$(tmux list-sessions 2>/dev/null | grep "claude" | head -1 | cut -d: -f1)
+                    tmux send-keys -t "$CLAUDE_SESSION" "/clear" Enter
+                    echo -e "${GREEN}✓${NC} /clear 명령이 '$CLAUDE_SESSION' 세션으로 전송되었습니다."
+                else
+                    echo -e "${YELLOW}⚠️${NC} tmux 세션을 찾을 수 없습니다."
+                    echo "다음 명령을 수동으로 실행하세요:"
+                    echo -e "${CYAN}/clear${NC}"
+                fi
+
+                echo ""
+                echo "복구 시:"
+                echo -e "${CYAN}/context --restore $(basename "$SNAPSHOT_FILE")${NC}"
+                ;;
+            [Cc])
+                echo -e "${GREEN}✓${NC} /compact 실행 중..."
+                echo ""
+
+                # tmux를 통해 /compact 자동 실행
+                if [ -n "$TMUX" ]; then
+                    sleep 1
+                    tmux send-keys "/compact" Enter
+                    echo -e "${GREEN}✓${NC} /compact 명령이 전송되었습니다."
+                elif tmux list-sessions 2>/dev/null | grep -q "claude"; then
+                    CLAUDE_SESSION=$(tmux list-sessions 2>/dev/null | grep "claude" | head -1 | cut -d: -f1)
+                    tmux send-keys -t "$CLAUDE_SESSION" "/compact" Enter
+                    echo -e "${GREEN}✓${NC} /compact 명령이 '$CLAUDE_SESSION' 세션으로 전송되었습니다."
+                else
+                    echo -e "${YELLOW}⚠️${NC} tmux 세션을 찾을 수 없습니다."
+                    echo "다음 명령을 수동으로 실행하세요:"
+                    echo -e "${CYAN}/compact${NC}"
+                fi
+                ;;
+            *)
+                echo "취소되었습니다. 수동으로 /clear 또는 /compact를 실행하세요."
+                ;;
+        esac
     else
         echo -e "${YELLOW}⚠️ /compact 실행을 권장합니다${NC}"
         echo ""

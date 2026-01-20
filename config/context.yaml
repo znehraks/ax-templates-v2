@@ -28,7 +28,7 @@ auto_actions:
   on_critical:
     - force_state_save
     - generate_recovery_handoff
-    - recommend_clear
+    - prompt_clear_confirmation  # 사용자 확인 후 /clear 실행
 
 # 상태 저장 설정
 state_saving:
