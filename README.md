@@ -53,7 +53,14 @@ ax-templates/
 ├── CLAUDE.md                 # 전역 AI 지침
 ├── config/
 │   ├── pipeline.yaml         # 파이프라인 정의
-│   └── models.yaml           # AI 모델 설정
+│   ├── models.yaml           # AI 모델 설정
+│   ├── context.yaml          # 컨텍스트 관리 설정
+│   ├── workflow.yaml         # 워크플로우 설정
+│   ├── model_enforcement.yaml # AI 역할 분담
+│   ├── git.yaml              # Git 자동 커밋 규칙
+│   ├── ai_logging.yaml       # AI 호출 로깅 설정
+│   ├── qa_logging.yaml       # 문답 자동 기록 설정
+│   └── mcp_fallbacks.yaml    # MCP 폴백 설정
 ├── stages/
 │   └── XX-stage-name/
 │       ├── CLAUDE.md         # 스테이지 AI 지침
@@ -75,6 +82,7 @@ ax-templates/
 
 ## 슬래시 커맨드
 
+### 기본 명령어
 | 커맨드 | 설명 |
 |--------|------|
 | `/init-project [name]` | 새 프로젝트 초기화 |
@@ -83,6 +91,33 @@ ax-templates/
 | `/checkpoint [desc]` | 체크포인트 생성 |
 | `/gemini [prompt]` | Gemini CLI 호출 (tmux) |
 | `/codex [prompt]` | Codex CLI 호출 (tmux) |
+
+### 가시성 명령어
+| 커맨드 | 설명 |
+|--------|------|
+| `/status` | 파이프라인 전체 상태 확인 |
+| `/stages` | 스테이지 목록 및 상세 |
+| `/context` | 컨텍스트(토큰) 상태 관리 |
+
+### 네비게이션 명령어
+| 커맨드 | 설명 |
+|--------|------|
+| `/next` | 다음 스테이지로 전환 |
+| `/restore` | 체크포인트에서 복구 |
+
+### 스테이지 단축 명령어
+| 커맨드 | 스테이지 |
+|--------|----------|
+| `/brainstorm` | 01-brainstorm |
+| `/research` | 02-research |
+| `/planning` | 03-planning |
+| `/ui-ux` | 04-ui-ux |
+| `/tasks` | 05-task-management |
+| `/implement` | 06-implementation |
+| `/refactor` | 07-refactoring |
+| `/qa` | 08-qa |
+| `/test` | 09-testing |
+| `/deploy` | 10-deployment |
 
 ## 디자인 패턴
 

@@ -27,12 +27,24 @@ hooks:
   pre-stage: ".claude/hooks/pre-stage.sh"
   post-stage: ".claude/hooks/post-stage.sh"
 
-# 컨텍스트 관리
+# 컨텍스트 관리 (퍼센트 기반, 남은 컨텍스트 기준)
 context:
-  warning_threshold: 50000
-  limit_threshold: 80000
+  # 퍼센트 기반 임계값 (권장)
+  thresholds:
+    warning: 60      # 60% 남음 - 경고 배너 표시
+    action: 50       # 50% 남음 - 자동 저장, 압축 권장
+    critical: 40     # 40% 남음 - /clear 권고
+
+  # 태스크 기반 자동 저장
+  task_save_frequency: 5  # 5개 태스크마다 저장
+
   auto_save: true
-  state_file: "state/context/state.md"
+  state_dir: "state/context"
+  state_file_pattern: "state_{timestamp}_{stage}.md"
+
+  # 레거시 절대값 (하위 호환용, 권장하지 않음)
+  # warning_threshold: 50000
+  # limit_threshold: 80000
 
 # 체크포인트 설정
 checkpoints:

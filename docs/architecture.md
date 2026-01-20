@@ -197,6 +197,9 @@ mkdir -p stages/XX-new-stage/{prompts,templates,inputs,outputs}
 
 ## 성능 최적화
 
-1. **컨텍스트 관리**: 50k 토큰 이하 유지 권장
+1. **컨텍스트 관리**: 퍼센트 기반 임계값 (60%/50%/40% 남은 컨텍스트 기준)
+   - 60% 남음: 경고 배너 표시
+   - 50% 남음: 자동 상태 저장, 압축 권장
+   - 40% 남음: `/clear` 권고, 복구 HANDOFF 생성
 2. **병렬 실행**: Orchestrator-Workers 패턴 활용
 3. **캐싱**: MCP 서버 캐시 활용 (firecrawl, exa)
