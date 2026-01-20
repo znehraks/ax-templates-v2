@@ -13,8 +13,16 @@
     "action_threshold_percent": 50,
     "critical_threshold_percent": 40,
     "auto_snapshot_on_warning": true,
-    "auto_compact_suggestion": true,
+    "auto_compact_enabled": true,
+    "auto_recovery_enabled": true,
+    "compact_cooldown_seconds": 300,
     "snapshot_dir": "state/context"
+  },
+
+  "hooks_info": {
+    "note": "실제 hooks 설정은 settings.local.json에 있음",
+    "stop": ".claude/hooks/stop.sh - 자동 /compact",
+    "session_start": ".claude/hooks/session-start.sh - 자동 복구"
   },
 
   "commands": {
