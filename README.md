@@ -13,9 +13,12 @@ ax-templates is a 10-stage software development workflow pipeline that orchestra
 ### Key Features
 
 - **10-Stage Pipeline**: Complete development cycle from brainstorming to deployment
-- **Multi-AI Orchestration**: Seamless collaboration between Gemini, Claude, and Codex
-- **Stateless Handoff**: Context transfer between stages via HANDOFF.md
-- **Checkpoint System**: Safe rollback support
+- **Multi-AI Orchestration**: Intelligent collaboration between Gemini, Claude, and Codex with parallel, sequential, and debate modes
+- **Smart HANDOFF System**: Automatic context extraction, semantic compression, and AI memory integration
+- **Auto-Checkpoint & Smart Rollback**: Task-based triggers, file change detection, partial rollback support
+- **Pipeline Forking**: Branch exploration for architecture alternatives with merge capabilities
+- **Stage Personas**: Optimized AI behavior profiles per stage (Creative Explorer, Precise Builder, etc.)
+- **Output Validation**: Automated quality checks with lint, typecheck, and coverage verification
 - **Dual Distribution**: Both NPM CLI and Claude Code plugin available
 
 ### Pipeline Stages
@@ -134,6 +137,15 @@ This monorepo contains three packages:
 | Gemini prompt | `ax gemini <prompt>` | `/gemini <prompt>` |
 | Codex prompt | `ax codex <prompt>` | `/codex <prompt>` |
 
+### Multi-AI Commands
+
+| Command | CLI | Plugin | Description |
+|---------|-----|--------|-------------|
+| AI Collaboration | `ax collaborate` | `/collaborate` | Run multi-AI collaboration (parallel, sequential, debate modes) |
+| AI Benchmarking | `ax benchmark` | `/benchmark` | Compare AI model performance on tasks |
+| Pipeline Fork | `ax fork` | `/fork` | Create/manage pipeline branches for exploration |
+| Output Validation | `ax validate` | `/validate` | Validate stage outputs against quality criteria |
+
 ### Stage Shortcuts
 
 | Stage | CLI | Plugin |
@@ -214,6 +226,9 @@ my-project/
 4. **Proactive State Externalization** - External state file management
 5. **State Machine Workflow** - State transition management (progress.json)
 6. **Layered Configuration** - Hierarchical configuration structure
+7. **Multi-AI Collaboration** - Parallel, sequential, and debate modes for AI coordination
+8. **Pipeline Forking** - Branch exploration with merge capabilities
+9. **Smart Context Management** - Semantic compression and AI memory integration
 
 ## Documentation
 

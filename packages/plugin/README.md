@@ -84,6 +84,31 @@ This creates the project structure with:
 | `/gemini <prompt>` | Execute via Gemini CLI (tmux) |
 | `/codex <prompt>` | Execute via Codex CLI (tmux) |
 
+### Multi-AI Commands
+
+| Command | Description |
+|---------|-------------|
+| `/collaborate` | Run multi-AI collaboration (parallel, sequential, debate modes) |
+| `/benchmark` | Compare AI model performance on specific tasks |
+| `/fork` | Create/manage pipeline branches for exploration |
+| `/validate` | Validate stage outputs against quality criteria |
+
+#### Usage Examples
+
+```
+# Parallel collaboration
+/collaborate --mode parallel --models claude,gemini --task "Brainstorm features"
+
+# Debate mode for architectural decisions
+/collaborate --mode debate --rounds 3
+
+# Create pipeline fork for alternative approaches
+/fork create --reason "Microservices vs Monolith" --direction "microservices"
+
+# Validate current stage outputs
+/validate --verbose
+```
+
 ### Stage Shortcuts
 
 | Command | Stage |
@@ -237,6 +262,32 @@ The plugin monitors context usage:
 | 60% | Warning banner |
 | 50% | Auto-save state |
 | 40% | Force save, recommend `/clear` |
+
+## Auto-Activated Skills
+
+The plugin includes skills that automatically activate based on triggers:
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `stage-transition` | "완료", `/next` | Detects stage completion and automates transitions |
+| `context-compression` | Token > 50k | Compresses context and saves state |
+| `smart-handoff` | Stage completion | Smart context extraction and HANDOFF generation |
+| `ai-collaboration` | `/collaborate` | Multi-AI collaboration orchestration |
+| `auto-checkpoint` | Trigger conditions | Automatic checkpoint creation |
+| `output-validator` | `/validate`, Stage end | Output validation and quality assurance |
+
+### Stage Personas
+
+Each stage has an optimized AI behavior profile:
+
+| Stage | Persona | Characteristics | Temperature |
+|-------|---------|-----------------|-------------|
+| 01-brainstorm | Creative Explorer | Divergent thinking, no constraints | 0.9 |
+| 02-research | Analytical Investigator | Systematic analysis, deep research | 0.5 |
+| 03-planning | Strategic Architect | Long-term view, structural thinking | 0.6 |
+| 06-implementation | Precise Builder | Accurate implementation, error prevention | 0.3 |
+| 07-refactoring | Code Surgeon | Deep analysis, performance optimization | 0.5 |
+| 08-qa | Quality Guardian | Thorough verification, risk detection | 0.4 |
 
 ## Requirements
 

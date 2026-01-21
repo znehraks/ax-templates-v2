@@ -15,6 +15,8 @@ graph TB
         Pipeline[Pipeline Controller]
         Hooks[Hook System]
         Scripts[Shell Scripts]
+        Collaboration[AI Collaboration Layer]
+        Forking[Pipeline Forking Manager]
     end
 
     subgraph "AI Agents"
@@ -24,10 +26,20 @@ graph TB
         Codex[Codex CLI]
     end
 
+    subgraph "Intelligence Layer"
+        Personas[Stage Persona System]
+        Validator[Output Validator]
+        SmartHandoff[Smart HANDOFF]
+        AutoCheckpoint[Auto-Checkpoint]
+    end
+
     subgraph "State Management"
         Progress[progress.json]
         Checkpoints[Checkpoints]
         Handoffs[HANDOFF.md]
+        Benchmarks[AI Benchmarks]
+        Forks[Pipeline Forks]
+        Validations[Validation Results]
     end
 
     subgraph "Stages"
@@ -47,13 +59,20 @@ graph TB
     Commands --> Pipeline
     Pipeline --> Hooks
     Pipeline --> Scripts
-    Scripts --> Claude
-    Scripts --> ClaudeCode
-    Scripts --> Gemini
-    Scripts --> Codex
+    Pipeline --> Collaboration
+    Pipeline --> Forking
+    Collaboration --> Claude
+    Collaboration --> ClaudeCode
+    Collaboration --> Gemini
+    Collaboration --> Codex
+    Personas --> Collaboration
+    Validator --> Pipeline
+    SmartHandoff --> Handoffs
+    AutoCheckpoint --> Checkpoints
     Pipeline --> Progress
-    Pipeline --> Checkpoints
-    Pipeline --> Handoffs
+    Pipeline --> Benchmarks
+    Forking --> Forks
+    Validator --> Validations
     S01 --> S02 --> S03 --> S04 --> S05 --> S06 --> S07 --> S08 --> S09 --> S10
 ```
 
@@ -105,6 +124,57 @@ graph TB
 **구현 파일:**
 - `scripts/gemini-wrapper.sh`
 - `scripts/codex-wrapper.sh`
+
+### 5. AI Collaboration Layer
+
+멀티 AI 협업을 조율합니다.
+
+**협업 모드:**
+- `parallel`: 동일 작업을 여러 AI로 동시 실행
+- `sequential`: AI 간 순차 전달 (리뷰 체인)
+- `debate`: AI 간 토론으로 최적 결론 도출
+
+**설정 파일:**
+- `config/ai_collaboration.yaml`
+- `config/ai_benchmarking.yaml`
+
+### 6. Pipeline Forking Manager
+
+파이프라인 분기를 관리합니다.
+
+**책임:**
+- 아키텍처 대안 탐색을 위한 분기 생성
+- 분기 간 비교 메트릭 (code_quality, performance, maintainability)
+- 최고 성능 분기 병합
+
+**설정 파일:**
+- `config/pipeline_forking.yaml`
+
+### 7. Stage Persona System
+
+스테이지별 AI 행동 프로파일을 관리합니다.
+
+**페르소나 예시:**
+| 스테이지 | 페르소나 | Temperature |
+|---------|---------|-------------|
+| 01-brainstorm | Creative Explorer | 0.9 |
+| 06-implementation | Precise Builder | 0.3 |
+| 08-qa | Quality Guardian | 0.4 |
+
+**설정 파일:**
+- `config/stage_personas.yaml`
+
+### 8. Output Validator
+
+스테이지 산출물의 품질을 검증합니다.
+
+**검증 항목:**
+- 필수 산출물 존재 확인
+- 코드 품질 (lint, typecheck)
+- 테스트 커버리지 (80%+ 기준)
+
+**설정 파일:**
+- `config/output_validation.yaml`
 
 ## 데이터 흐름
 
@@ -165,6 +235,41 @@ Session (runtime state)
 ### 설정 우선순위
 1. 스테이지 설정이 전역 설정을 오버라이드
 2. 런타임 상태가 정적 설정을 오버라이드
+
+### 설정 파일 목록
+
+**기본 설정:**
+- `config/pipeline.yaml` - 파이프라인 정의
+- `config/models.yaml` - AI 모델 할당
+- `config/context.yaml` - 컨텍스트 관리 설정
+- `config/git.yaml` - Git 자동 커밋 규칙
+
+**Multi-AI 설정:**
+- `config/ai_collaboration.yaml` - AI 협업 모드 설정
+- `config/ai_benchmarking.yaml` - AI 벤치마킹 설정
+
+**지능형 기능 설정:**
+- `config/handoff_intelligence.yaml` - 스마트 HANDOFF 설정
+- `config/memory_integration.yaml` - AI 메모리 통합 설정
+- `config/auto_checkpoint.yaml` - 자동 체크포인트 설정
+- `config/smart_rollback.yaml` - 스마트 롤백 설정
+- `config/pipeline_forking.yaml` - 파이프라인 분기 설정
+- `config/stage_personas.yaml` - 스테이지 페르소나 설정
+- `config/output_validation.yaml` - 산출물 검증 설정
+
+### State 디렉토리 구조
+
+```
+state/
+├── progress.json        # 파이프라인 진행 상황
+├── checkpoints/         # 체크포인트 저장
+├── context/             # 컨텍스트 상태 저장
+├── handoffs/            # 핸드오프 아카이브
+├── ai_benchmarks/       # AI 벤치마크 결과
+├── forks/               # 파이프라인 분기 상태
+├── validations/         # 검증 결과 저장
+└── templates/           # 상태 템플릿
+```
 
 ## 확장 포인트
 

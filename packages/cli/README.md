@@ -88,6 +88,55 @@ ax stages     # List all stages
 | `ax gemini <prompt>` | Execute prompt via Gemini CLI |
 | `ax codex <prompt>` | Execute prompt via Codex CLI |
 
+### Multi-AI Commands
+
+| Command | Description |
+|---------|-------------|
+| `ax collaborate` | Run multi-AI collaboration (parallel, sequential, debate modes) |
+| `ax benchmark` | Compare AI model performance on specific tasks |
+| `ax fork` | Create/manage pipeline branches for architecture exploration |
+| `ax validate` | Validate stage outputs against quality criteria |
+
+#### Collaboration Modes
+
+```bash
+# Parallel mode - same task, multiple AIs
+ax collaborate --mode parallel --models claude,gemini --task "Generate ideas"
+
+# Debate mode - AI discussion for optimal solution
+ax collaborate --mode debate --rounds 3
+
+# Sequential mode - AI review chain
+ax collaborate --mode sequential --task "Code review"
+```
+
+#### Pipeline Forking
+
+```bash
+# Create a fork
+ax fork create --reason "Architecture alternatives" --direction "microservices"
+
+# List and compare forks
+ax fork list
+ax fork compare
+
+# Merge best fork
+ax fork merge fork_name
+```
+
+#### Output Validation
+
+```bash
+# Validate current stage
+ax validate
+
+# Validate with auto-fix
+ax validate --fix
+
+# Force continue on failure (not recommended)
+ax validate --force
+```
+
 ### Stage Shortcuts
 
 Run stages directly with shortcut commands:

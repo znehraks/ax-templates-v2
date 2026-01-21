@@ -113,9 +113,82 @@ my-app
 - **ClaudeCode**: 코드 생성, 구조화
 - **Codex**: 리팩토링, 테스트 생성
 
-### 2. 체크포인트 활용
+### 2. Multi-AI 협업 활용
 
-구현/리팩토링 스테이지에서는 주기적으로:
+다양한 협업 모드를 활용하여 최적의 결과를 얻으세요:
+
+#### Parallel 모드 (브레인스토밍)
+
+```bash
+/collaborate --mode parallel --models claude,gemini --task "핵심 기능 아이디어 생성"
+```
+
+- 여러 AI가 동시에 같은 작업 수행
+- 다양한 관점의 아이디어 확보
+- 01-brainstorm, 02-research 스테이지에 적합
+
+#### Debate 모드 (의사결정)
+
+```bash
+/collaborate --mode debate --rounds 3
+```
+
+- AI 간 토론을 통해 최적 결론 도출
+- 아키텍처 결정, 기술 선택 시 유용
+- 03-planning, 04-ui-ux 스테이지에 적합
+
+#### Sequential 모드 (리뷰)
+
+```bash
+/collaborate --mode sequential --task "코드 리뷰"
+```
+
+- AI가 순차적으로 검토 및 개선
+- 품질 향상에 효과적
+- 06-implementation, 07-refactoring 스테이지에 적합
+
+### 3. 파이프라인 분기 활용
+
+아키텍처 대안 탐색 시:
+
+```bash
+# 분기 생성
+/fork create --reason "아키텍처 대안" --direction "microservices"
+
+# 다른 분기 생성
+/fork create --reason "아키텍처 대안" --direction "monolith"
+
+# 분기 비교
+/fork compare
+
+# 최적 분기 병합
+/fork merge microservices
+```
+
+### 4. 산출물 검증 활용
+
+스테이지 완료 전 품질 확인:
+
+```bash
+# 기본 검증
+/validate
+
+# 자동 수정 포함
+/validate --fix
+
+# 상세 출력
+/validate --verbose
+```
+
+### 5. 자동 체크포인트 활용
+
+시스템이 자동으로 체크포인트를 생성하는 트리거:
+- 5개 태스크 완료 시
+- 100줄 이상 파일 변경 시
+- 파괴적 작업 (rm, delete) 감지 시
+- 30분 경과 시
+
+수동 생성도 가능합니다:
 
 ```bash
 /checkpoint "스프린트 1 완료"
@@ -127,7 +200,13 @@ my-app
 scripts/restore-checkpoint.sh CP-06-20240120-1430
 ```
 
-### 3. 컨텍스트 관리 (퍼센트 기반)
+부분 롤백도 지원합니다:
+
+```bash
+/restore checkpoint_id --partial --files "src/auth/*"
+```
+
+### 6. 컨텍스트 관리 (퍼센트 기반)
 
 | 남은 컨텍스트 | 동작 |
 |--------------|------|
