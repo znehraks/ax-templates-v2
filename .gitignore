@@ -1,9 +1,11 @@
 # Dependencies
 node_modules/
+**/node_modules/
 .pnpm-store/
 
 # Build outputs
 dist/
+**/dist/
 build/
 *.tsbuildinfo
 
@@ -27,7 +29,11 @@ pnpm-debug.log*
 
 # Test coverage
 coverage/
+**/coverage/
 .nyc_output/
+
+# Test artifacts
+.vitest/
 
 # Environment
 .env
