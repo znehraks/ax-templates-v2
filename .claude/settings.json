@@ -109,6 +109,41 @@
     "deploy": {
       "description": "10-deployment 스테이지 시작",
       "file": "commands/deploy.md"
+    },
+    "collaborate": {
+      "description": "Multi-AI 협업 실행",
+      "file": "commands/collaborate.md"
+    },
+    "benchmark": {
+      "description": "AI 모델 벤치마킹",
+      "file": "commands/benchmark.md"
+    },
+    "fork": {
+      "description": "파이프라인 분기 관리",
+      "file": "commands/fork.md"
+    },
+    "validate": {
+      "description": "산출물 검증 실행",
+      "file": "commands/validate.md"
+    }
+  },
+
+  "skills": {
+    "smart-handoff": {
+      "description": "스마트 컨텍스트 추출 및 HANDOFF 생성",
+      "directory": "skills/smart-handoff"
+    },
+    "ai-collaboration": {
+      "description": "Multi-AI 협업 오케스트레이션",
+      "directory": "skills/ai-collaboration"
+    },
+    "auto-checkpoint": {
+      "description": "자동 체크포인트 생성",
+      "directory": "skills/auto-checkpoint"
+    },
+    "output-validator": {
+      "description": "산출물 검증 및 품질 확인",
+      "directory": "skills/output-validator"
     }
   }
 }

@@ -229,3 +229,57 @@ transitions:
   rollback:
     enabled: true
     max_rollback_stages: 2
+
+# Pipeline Forking Configuration
+# See config/pipeline_forking.yaml for detailed settings
+forking:
+  enabled: true
+
+  # Stages where forking is allowed
+  fork_points:
+    - stage: "03-planning"
+      condition: "multiple_architectures_proposed"
+      description: "아키텍처 대안 탐색용 분기"
+
+    - stage: "06-implementation"
+      condition: "technology_alternatives"
+      description: "기술 스택 대안 탐색용 분기"
+
+  # Fork management
+  management:
+    max_active_forks: 3
+    state_directory: "state/forks"
+
+    # Auto-merge settings
+    auto_merge:
+      enabled: false
+      strategy: "best_performer"
+
+    # Cleanup settings
+    cleanup:
+      delete_merged_forks: false
+      archive_directory: "state/forks/archived"
+
+  # Fork comparison metrics
+  comparison:
+    enabled: true
+    metrics:
+      - name: "code_quality"
+        weight: 0.4
+        command: "npm run lint -- --format json"
+
+      - name: "performance"
+        weight: 0.3
+        command: "npm run benchmark"
+
+      - name: "maintainability"
+        weight: 0.3
+        tool: "sonarqube"
+
+  # Integration with commands
+  commands:
+    create: "/fork create"
+    list: "/fork list"
+    compare: "/fork compare"
+    merge: "/fork merge"
+    delete: "/fork delete"

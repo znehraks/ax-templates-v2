@@ -99,6 +99,14 @@
 | `/gemini [prompt]` | Gemini CLI 호출 |
 | `/codex [prompt]` | Codex CLI 호출 |
 
+### Multi-AI 명령어
+| 커맨드 | 설명 |
+|--------|------|
+| `/collaborate` | Multi-AI 협업 실행 |
+| `/benchmark` | AI 모델 벤치마킹 |
+| `/fork` | 파이프라인 분기 관리 |
+| `/validate` | 산출물 검증 실행 |
+
 ### 가시성 명령어
 | 커맨드 | 설명 |
 |--------|------|
@@ -132,6 +140,10 @@
 |------|--------|------|
 | `stage-transition` | "완료", "/next" | 스테이지 완료 감지 및 전환 자동화 |
 | `context-compression` | 토큰 50k+ | 컨텍스트 압축 및 상태 저장 |
+| `smart-handoff` | 스테이지 완료 | 스마트 컨텍스트 추출 및 HANDOFF 생성 |
+| `ai-collaboration` | `/collaborate` | Multi-AI 협업 오케스트레이션 |
+| `auto-checkpoint` | 트리거 조건 충족 | 자동 체크포인트 생성 |
+| `output-validator` | `/validate`, 스테이지 완료 | 산출물 검증 및 품질 확인 |
 
 ## Git 자동 커밋 규칙
 
@@ -299,6 +311,220 @@ state/
 4. **Proactive State Externalization** - 외부 상태 파일 관리
 5. **State Machine Workflow** - 상태 전이 관리 (progress.json)
 6. **Layered Configuration** - 계층화된 설정 구조 (global → stage)
+
+---
+
+## Multi-AI Orchestration
+
+> 설정 파일: `config/ai_collaboration.yaml`, `config/ai_benchmarking.yaml`
+
+### AI 협업 모드
+
+| 모드 | 설명 | 사용 스테이지 |
+|------|------|--------------|
+| `parallel` | 동일 작업을 여러 AI로 동시 실행 | 01-brainstorm, 02-research |
+| `sequential` | AI 간 순차 전달 (리뷰 체인) | 06-implementation, 07-refactoring |
+| `debate` | AI 간 토론으로 최적 결론 도출 | 03-planning, 04-ui-ux |
+
+### AI 모델 전문화
+
+| AI 모델 | 강점 | 최적 스테이지 |
+|--------|------|--------------|
+| Claude | 정확한 코드 생성, 로직 분석 | 06-implementation, 08-qa |
+| Gemini | 창의적 아이디어, 빠른 탐색 | 01-brainstorm, 03-planning |
+| Codex | 깊이 있는 분석, 리팩토링 | 07-refactoring, 09-testing |
+
+### 사용 방법
+```bash
+# 병렬 협업 실행
+/collaborate --mode parallel --models claude,gemini --task "아이디어 생성"
+
+# 토론 모드
+/collaborate --mode debate --rounds 3
+
+# AI 벤치마킹
+/benchmark --task code_generation --models claude,codex
+```
+
+---
+
+## Smart HANDOFF 시스템
+
+> 설정 파일: `config/handoff_intelligence.yaml`, `config/memory_integration.yaml`
+
+### 자동 추출 항목
+- 완료된 작업 (`completed_tasks`)
+- 핵심 결정사항 (`key_decisions`)
+- 수정된 파일 (`modified_files`)
+- 대기 이슈 (`pending_issues`)
+- AI 호출 기록 (`ai_call_history`)
+
+### 컨텍스트 압축
+- **전략**: 의미 기반 압축 (`semantic`)
+- **목표 비율**: 원본의 30%
+- **보존 항목**: 핵심 결정, 차단 이슈, 파일 변경
+
+### AI 메모리 통합
+- claude-mem MCP와 연동
+- 스테이지 완료 시 자동 메모리 저장
+- 스테이지 시작 시 이전 컨텍스트 주입
+
+### HANDOFF 모드
+```bash
+# 기본 (스마트) HANDOFF
+/handoff
+
+# 컴팩트 모드 (최소 필수 정보만)
+/handoff --compact
+
+# 복구용 상세 HANDOFF
+/handoff --recovery
+```
+
+---
+
+## 자동 체크포인트 시스템
+
+> 설정 파일: `config/auto_checkpoint.yaml`, `config/smart_rollback.yaml`
+
+### 자동 생성 트리거
+
+| 트리거 | 조건 | 동작 |
+|--------|------|------|
+| 태스크 기반 | 5개 태스크 완료 | 체크포인트 생성 |
+| 파일 변경 | 100줄 이상 변경 | 체크포인트 생성 |
+| 파괴적 작업 | rm, delete, drop 패턴 | 강제 체크포인트 |
+| 시간 기반 | 30분 경과 | 체크포인트 생성 |
+
+### 보존 정책
+- 최대 보존: 10개
+- 마일스톤 유지: 스테이지 완료 체크포인트는 영구 보존
+
+### 스마트 롤백
+```bash
+# 체크포인트 목록
+/restore --list
+
+# 특정 체크포인트로 롤백
+/restore checkpoint_20240101_120000
+
+# 부분 롤백 (파일 레벨)
+/restore checkpoint_id --partial --files "src/auth/*"
+```
+
+---
+
+## 파이프라인 분기 (Forking)
+
+> 설정 파일: `config/pipeline_forking.yaml`
+
+### 분기 시점
+- 아키텍처 대안 제안 시 (03-planning)
+- 기술적 선택지 존재 시 (06-implementation)
+
+### 분기 관리
+- **최대 활성 분기**: 3개
+- **병합 전략**: 최고 성능 기준 (`best_performer`)
+
+### 비교 메트릭
+- 코드 품질 (`code_quality`)
+- 성능 (`performance`)
+- 유지보수성 (`maintainability`)
+
+### 사용 방법
+```bash
+# 분기 생성
+/fork create --reason "아키텍처 대안 탐색" --direction "microservices"
+
+# 분기 목록
+/fork list
+
+# 분기 비교
+/fork compare
+
+# 분기 병합
+/fork merge fork_name
+
+# 분기 삭제
+/fork delete fork_name
+```
+
+---
+
+## 스테이지 페르소나
+
+> 설정 파일: `config/stage_personas.yaml`
+
+각 스테이지에 최적화된 AI 행동 특성을 정의합니다.
+
+| 스테이지 | 페르소나 | 특성 | Temperature |
+|---------|---------|------|-------------|
+| 01-brainstorm | Creative Explorer | 발산적 사고, 제약 없는 아이디어 | 0.9 |
+| 02-research | Analytical Investigator | 체계적 분석, 깊이 있는 조사 | 0.5 |
+| 03-planning | Strategic Architect | 장기적 관점, 구조적 사고 | 0.6 |
+| 06-implementation | Precise Builder | 정확한 구현, 에러 방지 | 0.3 |
+| 07-refactoring | Code Surgeon | 깊이 있는 분석, 성능 최적화 | 0.5 |
+| 08-qa | Quality Guardian | 철저한 검증, 위험 감지 | 0.4 |
+
+---
+
+## 산출물 검증
+
+> 설정 파일: `config/output_validation.yaml`
+
+### 검증 항목
+
+| 스테이지 | 필수 산출물 | 검증 명령 |
+|---------|-----------|----------|
+| 01-brainstorm | `ideas.md` (최소 5개 아이디어) | - |
+| 06-implementation | `src/` (lint, typecheck 통과) | `npm run lint`, `npm run typecheck` |
+| 09-testing | `tests/` (커버리지 80%+) | `npm run test:coverage` |
+
+### 품질 메트릭
+- 코드 품질 기준: 0.8
+- 테스트 커버리지 기준: 80%
+
+### 사용 방법
+```bash
+# 현재 스테이지 검증
+/validate
+
+# 특정 스테이지 검증
+/validate --stage 06-implementation
+
+# 자동 수정 포함
+/validate --fix
+
+# 상세 출력
+/validate --verbose
+
+# 실패해도 진행 (비권장)
+/validate --force
+```
+
+---
+
+## 신규 설정 파일
+
+| 파일 | 설명 |
+|------|------|
+| `config/ai_collaboration.yaml` | AI 협업 모드 설정 |
+| `config/ai_benchmarking.yaml` | AI 벤치마킹 설정 |
+| `config/handoff_intelligence.yaml` | 스마트 HANDOFF 설정 |
+| `config/memory_integration.yaml` | AI 메모리 통합 설정 |
+| `config/auto_checkpoint.yaml` | 자동 체크포인트 설정 |
+| `config/smart_rollback.yaml` | 스마트 롤백 설정 |
+| `config/pipeline_forking.yaml` | 파이프라인 분기 설정 |
+| `config/stage_personas.yaml` | 스테이지 페르소나 설정 |
+| `config/output_validation.yaml` | 산출물 검증 설정 |
+
+## 신규 State 디렉토리
+
+| 디렉토리 | 설명 |
+|---------|------|
+| `state/ai_benchmarks/` | AI 벤치마크 결과 저장 |
+| `state/forks/` | 파이프라인 분기 상태 저장 |
+| `state/validations/` | 검증 결과 저장 |
 
 <claude-mem-context>
 # Recent Activity
